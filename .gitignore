@@ -1,0 +1,20 @@
+# Bỏ qua thư mục ảo hóa Python
+venv/
+.venv/
+env/
+
+# Bỏ qua file cache của Python
+__pycache__/
+*.py[cod]
+
+# Bỏ qua file cấu hình hệ thống (Mac/Windows)
+.DS_Store
+Thumbs.db
+
+# Bỏ qua dữ liệu cá nhân (Database)
+# Nếu bạn muốn giữ lại cấu trúc folder data nhưng không muốn lộ lịch cá nhân
+data/events.json
+data/*.db
+
+# Bỏ qua các file log (nếu có)
+*.log

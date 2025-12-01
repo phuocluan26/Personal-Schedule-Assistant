@@ -1,0 +1,11 @@
+# NLP Libraries
+underthesea>=6.0.0      # Thư viện xử lý tiếng Việt chính
+python-dateutil>=2.8.2  # Hỗ trợ phân tích thời gian tương đối
+regex                   # Hỗ trợ biểu thức chính quy nâng cao
+
+# GUI & System (Tùy chọn thư viện bạn dùng, ví dụ Tkinter là built-in)
+plyer                   # Hỗ trợ hiển thị Notification Pop-up đa nền tảng
+pyperclip               # Hỗ trợ copy/paste (nếu cần)
+
+# Testing
+pytest                  # Để chạy bộ test case tự động

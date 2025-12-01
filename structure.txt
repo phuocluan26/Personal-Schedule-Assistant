@@ -1,0 +1,15 @@
+PersonalScheduleAssistant/
+│
+├── data/                   <-- (Giữ nguyên)
+│   └── events.json
+│
+├── src/
+│   ├── database/           <-- (Giữ nguyên code cũ)
+│   ├── nlp/                <-- (Giữ nguyên code cũ)
+│   ├── web/                <-- (THƯ MỤC MỚI)
+│   │   ├── static/        <-- Chứa file CSS/JS nếu cần
+│   │   └── templates/
+│   │       └── index.html  <-- File giao diện HTML
+│   └── app.py              <-- File chạy chính (thay cho main.py cũ)
+│
+└── requirements.txt
