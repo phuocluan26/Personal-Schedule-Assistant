@@ -1,8 +1,5 @@
-/* src/web/static/css/style.css */
+/* src/web/static/css/style.css - BẢN CHUẨN GỌN GÀNG */
 
-/* =========================================
-   1. GLOBAL STYLES
-   ========================================= */
 body { 
     background-color: #f4f6f9; 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -10,31 +7,25 @@ body {
     overflow-x: hidden; 
 }
 
-/* =========================================
-   2. SIDEBAR STYLES (KHUNG CÔNG VIỆC)
-   ========================================= */
-/* Khung bao bọc Sidebar */
+/* --- SIDEBAR --- */
 .sidebar-container {
     background: white; 
     padding: 20px; 
     border-radius: 12px; 
     box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
-    min-height: 700px; /* Chiều cao cân đối với Calendar */
+    min-height: 700px;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
-/* Thẻ công việc (Task Card) */
 .task-card { 
     cursor: pointer; 
     transition: all 0.2s; 
     background: #f8f9fa; 
     margin-bottom: 12px;
     border: 1px solid #eee;
-    box-shadow: none;
 }
-
 .task-card:hover { 
     transform: translateY(-2px); 
     background: white;
@@ -42,21 +33,16 @@ body {
     border-color: transparent;
 }
 
-/* Hiệu ứng khi hoàn thành công việc (Gạch ngang) */
 .task-completed {
     text-decoration: line-through !important;
     opacity: 0.6;
     background-color: #f0f0f0 !important;
     border-left-color: #6c757d !important;
 }
+.task-completed .badge { opacity: 0.5; }
 
-.task-completed .badge {
-    opacity: 0.5;
-}
-
-/* Thanh cuộn cho danh sách */
 .scrollable-sidebar { 
-    flex-grow: 1; /* Tự động lấp đầy khoảng trống còn lại */
+    flex-grow: 1; 
     overflow-y: auto; 
     padding-right: 5px; 
     margin-top: 15px;
@@ -64,11 +50,8 @@ body {
 }
 .scrollable-sidebar::-webkit-scrollbar { width: 6px; }
 .scrollable-sidebar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-.scrollable-sidebar::-webkit-scrollbar-track { background: transparent; }
 
-/* =========================================
-   3. CALENDAR STYLES (FULLCALENDAR)
-   ========================================= */
+/* --- CALENDAR --- */
 #calendar { 
     background: white; 
     padding: 20px; 
@@ -76,37 +59,15 @@ body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
     min-height: 700px; 
 }
-
-.fc-event { 
-    cursor: pointer; 
-    border: none; 
-    padding: 4px; 
-    font-size: 0.9em; 
-    border-radius: 4px; 
-}
-
-.fc-daygrid-event { 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-}
-
-/* Màu nền cho ngày được chọn khi click */
-.selected-day-highlight {
-    background-color: #e8f0fe !important;
-}
-
+.fc-event { cursor: pointer; border: none; padding: 4px; font-size: 0.9em; border-radius: 4px; }
+.fc-daygrid-event { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.selected-day-highlight { background-color: #e8f0fe !important; }
 .fc-day-today { background-color: #fff9e6 !important; }
 .fc-toolbar-title { font-size: 1.5rem !important; font-weight: 800; color: #2c3e50; }
 .fc-button-primary { background-color: #fff !important; color: #555 !important; border: 1px solid #ddd !important; font-weight: 600; }
 .fc-button-primary.fc-button-active { background-color: #0d6efd !important; color: white !important; }
 
-/* =========================================
-   4. MODAL STYLES (GOOGLE CALENDAR STYLE)
-   ========================================= */
-.google-modal-header {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
+/* --- MODAL STYLE (GOOGLE STYLE CHO BODY, HEADER MẶC ĐỊNH) --- */
 .google-input-title {
     font-size: 22px;
     border: none;
@@ -115,29 +76,11 @@ body {
     padding-left: 0;
     font-weight: 500;
 }
-.google-input-title:focus {
-    box-shadow: none;
-    border-bottom: 2px solid #1a73e8;
-}
+.google-input-title:focus { box-shadow: none; border-bottom: 2px solid #1a73e8; }
 
-.event-row {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 15px;
-}
-
-.event-icon {
-    width: 40px;
-    text-align: center;
-    color: #5f6368;
-    font-size: 1.2rem;
-    padding-top: 8px;
-    margin-right: 10px;
-}
-
-.event-input-group {
-    flex-grow: 1;
-}
+.event-row { display: flex; align-items: flex-start; margin-bottom: 15px; }
+.event-icon { width: 40px; text-align: center; color: #5f6368; font-size: 1.2rem; padding-top: 8px; margin-right: 10px; }
+.event-input-group { flex-grow: 1; }
 
 .google-input {
     background-color: #f1f3f4;
@@ -147,13 +90,8 @@ body {
     width: 100%;
     transition: 0.2s;
 }
-.google-input:focus {
-    background-color: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    outline: 2px solid #1a73e8;
-}
+.google-input:focus { background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); outline: 2px solid #1a73e8; }
 
-/* Ô hiển thị nội dung gốc (Raw Text) */
 .raw-text-area {
     background-color: #f8f9fa;
     border: 1px dashed #ccc;
