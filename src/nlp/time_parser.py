@@ -14,7 +14,8 @@ class TimeParser:
         s_lower = time_str.lower().strip()
 
         try:
-            # 1. XỬ LÝ ĐẶC BIỆT
+            # Xử lý trường hợp "rưỡi" và "kém"
+            # Ví dụ: "3 giờ rưỡi", "5h kém 15"
             if special_type == "half":
                 nums = re.findall(r"\d+", s_lower)
                 if nums: hour, minute = int(nums[0]), 30
@@ -24,7 +25,7 @@ class TimeParser:
                     t = datetime(2000, 1, 1, int(nums[0]), 0) - timedelta(minutes=int(nums[1]))
                     hour, minute = t.hour, t.minute
             else:
-                # 2. XỬ LÝ CHUẨN
+                # Xử lý trường hợp giờ có am hay pm
                 s_clean = s_lower.replace("a.m", "am").replace("p.m", "pm")
                 is_pm = "pm" in s_clean
                 is_am = "am" in s_clean
@@ -52,7 +53,7 @@ class TimeParser:
                         if hour < 12: hour += 12
                     
                     elif ss in ['đêm', 'dem']:
-                        # QUAN TRỌNG: 12h đêm -> 0h
+                        # 12h đêm -> 0h
                         if hour == 12: 
                             hour = 0
                         # 9h đêm -> 21h
@@ -60,7 +61,6 @@ class TimeParser:
                             hour += 12
                         # Các trường hợp 1h, 2h, 3h đêm giữ nguyên (hiểu là sáng sớm)
             
-            # Validation
             if not (0 <= hour <= 23): return None, f"Giờ không hợp lệ: {hour}h"
             if not (0 <= minute <= 59): return None, f"Phút không hợp lệ: {minute}p"
             
@@ -69,7 +69,6 @@ class TimeParser:
         except: return None, f"Lỗi đọc giờ: {time_str}"
 
     def parse_date(self, date_str, day_month_tuple=None):
-        # (Copy lại nội dung hàm parse_date từ phiên bản hoạt động tốt gần nhất)
         today = datetime.now().replace(microsecond=0)
         if day_month_tuple:
             d, m = day_month_tuple
@@ -79,7 +78,7 @@ class TimeParser:
                 if (today - target).days > 30: target = target.replace(year=year+1)
                 return target, True
             except: return None, False
-
+         # Kiểm tra các từ khóa ngày tương đối
         if not date_str: return today, True
         s = date_str.lower()
         if "hôm nay" in s or "hom nay" in s: return today, True
@@ -101,6 +100,7 @@ class TimeParser:
                 found_weekday = True
                 break
         
+        # Kiểm tra nếu có từ khóa tuần
         if found_weekday:
             if "tuần sau" in s or "tuần tới" in s or "tuan sau" in s:
                 target_date += timedelta(days=7)

@@ -1,15 +1,41 @@
 PersonalScheduleAssistant/
 │
-├── data/                   <-- (Giữ nguyên)
-│   └── events.json
+├── data/
+│   └── events.json             <-- Database lưu trữ sự kiện
 │
 ├── src/
-│   ├── database/           <-- (Giữ nguyên code cũ)
-│   ├── nlp/                <-- (Giữ nguyên code cũ)
-│   ├── web/                <-- (THƯ MỤC MỚI)
-│   │   ├── static/        <-- Chứa file CSS/JS nếu cần
+│   ├── database/
+│   │   └── db_manager.py       <-- Quản lý đọc/ghi file JSON
+│   │
+│   ├── nlp/
+│   │   ├── engine.py           <-- Logic chính
+│   │   ├── ner.py              <-- Trích xuất địa điểm
+│   │   ├── rules.py            <-- Luật Regex
+│   │   ├── processor.py        <-- Chuẩn hóa văn bản
+│   │   └── time_parser.py      <-- Xử lý thời gian
+│   │
+│   ├── web/
+│   │   ├── static/
+│   │   │   ├── css/
+│   │   │   │   └── style.css
+│   │   │   └── js/
+│   │   │       ├── script.js       <-- Trang chủ
+│   │   │       └── test_script.js  <-- Trang Test
+│   │   │
 │   │   └── templates/
-│   │       └── index.html  <-- File giao diện HTML
-│   └── app.py              <-- File chạy chính (thay cho main.py cũ)
+│   │       ├── index.html      <-- Giao diện chính
+│   │       └── test.html       <-- Giao diện Test
+│   │
+│   └── app.py                  <-- Server Flask
 │
-└── requirements.txt
+├── test/                       <-- Thư mục chứa dữ liệu kiểm thử
+│   ├── test_cases_2.csv
+│   └── test_cases.csv
+│
+├── dist/
+│   └── SmartScheduleAI.exe       <-- File chạy chương trình
+│
+├── Start_App.bat               <-- File chạy dự phòng (Script tự cài môi trường)
+├── requirements.txt            <-- Danh sách thư viện
+├── README.md                   <-- Hướng dẫn sử dụng
+└── .gitignore

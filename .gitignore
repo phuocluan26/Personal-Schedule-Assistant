@@ -1,20 +1,29 @@
-# Bỏ qua thư mục ảo hóa Python
+# --- 1. Môi trường ảo & Python (BẮT BUỘC) ---
 venv/
-.venv/
 env/
-
-# Bỏ qua file cache của Python
+.venv/
 __pycache__/
 *.py[cod]
+*$py.class
 
-# Bỏ qua file cấu hình hệ thống (Mac/Windows)
-.DS_Store
-Thumbs.db
-
-# Bỏ qua dữ liệu cá nhân (Database)
-# Nếu bạn muốn giữ lại cấu trúc folder data nhưng không muốn lộ lịch cá nhân
-data/events.json
+# --- 2. Dữ liệu & Database (QUAN TRỌNG) ---
+data/*.json
 data/*.db
 
-# Bỏ qua các file log (nếu có)
+# Ngoại lệ: Giữ lại file .gitkeep để Git vẫn theo dõi thư mục data/
+!data/.gitkeep
+
+# --- 3. Bỏ file đóng gói .EXE (PyInstaller) ---
+dist/
+build/
+*.spec
+
+# --- 4. Cấu hình IDE & Hệ điều hành (File rác hệ thống) ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- 5. Logs & Lỗi ---
 *.log

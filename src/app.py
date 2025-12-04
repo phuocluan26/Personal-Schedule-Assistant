@@ -2,34 +2,39 @@
 from flask import Flask, render_template, request, jsonify,Response
 import sys
 import os
-import json #
+import json
 import csv
 import io # <--- Thêm thư viện này để đọc file từ bộ nhớ
 from datetime import datetime
 import pandas as pd
+import webbrowser
+from threading import Timer
 
+# Thêm đường dẫn src vào sys.path để import module nội bộ
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from database.db_manager import DBManager
 from nlp.engine import NLPEngine
 
+# Khởi tạo Flask app và các thành phần cần thiết
 app = Flask(__name__, template_folder='web/templates', static_folder='web/static')
 db = DBManager()
 nlp = NLPEngine()
 
+# Các route của ứng dụng
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# API lấy danh sách sự kiện
 @app.route('/api/events', methods=['GET'])
 def get_events():
     events = db.get_all_events()
     formatted_events = []
     
     for e in events:
-        # Xử lý màu sắc
-        event_color = '#3f9dff' # Xanh (Default)
+        event_color = '#3f9dff'
         if e.get('event_type') == 'DEADLINE':
-            event_color = '#dc3545' # Đỏ
+            event_color = '#dc3545'
 
         # Xử lý All-day (Nếu DB có lưu hoặc độ dài chuỗi ngày là 10 ký tự)
         is_all_day = e.get('all_day', False) or len(e['start_time']) == 10
@@ -51,6 +56,7 @@ def get_events():
         })
     return jsonify(formatted_events)
 
+#API thêm sự kiện mới
 @app.route('/api/add', methods=['POST'])
 def add_event():
     data = request.json
@@ -68,7 +74,7 @@ def add_event():
                 'message': processed_data.get('error_message', 'Dữ liệu không hợp lệ')
             })
 
-        # 3. QUAN TRỌNG: Gán nội dung gốc vào kết quả để lưu xuống DB
+        # 3.Gán nội dung gốc vào kết quả để lưu xuống DB
         # (Để sau này hiển thị lại trong popup chi tiết)
         processed_data['raw_text'] = raw_text 
 
@@ -80,6 +86,7 @@ def add_event():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
 
+#API cập nhật sự kiện
 @app.route('/api/update/<int:event_id>', methods=['PUT'])
 def update_event(event_id):
     data = request.json
@@ -87,15 +94,17 @@ def update_event(event_id):
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error'})
 
+#API xóa sự kiện
 @app.route('/api/delete/<int:event_id>', methods=['DELETE'])
 def delete_event(event_id):
     db.delete_event(event_id)
     return jsonify({'status': 'success'})
 
+#API xuất sự kiện ra file JSON
 @app.route('/api/export', methods=['GET'])
 def export_events():
     """Xuất danh sách sự kiện của một ngày cụ thể ra file JSON"""
-    date_str = request.args.get('date') # Lấy ngày từ URL (VD: ?date=2025-12-01)
+    date_str = request.args.get('date')
     
     if not date_str:
         return "Thiếu tham số ngày!", 400
@@ -115,12 +124,12 @@ def export_events():
         headers={'Content-Disposition': f'attachment;filename=tasks_{date_str}.json'}
     )
     
-# --- ROUTE MỚI: TRANG TEST ---
+# Trang dashboard test NLP
 @app.route('/test-dashboard')
 def test_dashboard():
     return render_template('test.html')
 
-# --- API XỬ LÝ TEST NLP ---
+#API xử lý file test NLP
 @app.route('/api/test-nlp', methods=['POST'])
 def process_test_file():
     if 'file' not in request.files:
@@ -192,7 +201,6 @@ def process_test_file():
             # Địa điểm: So sánh không phân biệt hoa thường
             check_loc = exp_loc.lower() == act_loc.lower()
             # Tiêu đề: So sánh tương đối (chứa nhau là được, hoặc giống 80%)
-            # Ở đây ta so sánh chính xác cho nghiêm ngặt, bỏ qua hoa thường
             check_title = exp_title.lower() in act_title.lower() or act_title.lower() in exp_title.lower()
 
             # Đánh giá cuối cùng: Cả 3 phải đúng mới là PASS
@@ -208,7 +216,7 @@ def process_test_file():
             if not check_title: error_detail.append(f"Tiêu đề sai ({act_title})")
             
             error_msg = ", ".join(error_detail) if status == "FAIL" else ""
-
+            # 6. LƯU KẾT QUẢ
             results.append({
                 "id": str(row.get('id', index + 1)),
                 "text": input_text,
@@ -223,7 +231,7 @@ def process_test_file():
             })
 
         accuracy = round((correct_count / total_count * 100), 2) if total_count > 0 else 0
-        
+        # Trả về kết quả
         return jsonify({
             "success": True,
             "accuracy": accuracy,
@@ -237,5 +245,10 @@ def process_test_file():
         print(f"❌ LỖI SERVER: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+# Hàm mở trình duyệt tự động khi chạy app
+def open_browser():
+    webbrowser.open_new("http://127.0.0.1:5000")
+    
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    Timer(1, open_browser).start()
+    app.run(debug=False, port=5000, use_reloader=False)

@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchEvents();
 });
 
+//Báo lỗi tải API và hiển thị thông báo
 function fetchEvents() {
     fetch('/api/events')
         .then(response => response.json())
@@ -81,6 +82,7 @@ function fetchEvents() {
         });
 }
 
+// Lọc và hiển thị sidebar theo ngày đã chọn
 function filterSidebarByDate(dateStr) {
     const displayDate = new Date(dateStr).toLocaleDateString('vi-VN');
     const titleEl = document.getElementById('sidebarTitle');
@@ -89,6 +91,7 @@ function filterSidebarByDate(dateStr) {
     renderSidebar(filteredEvents);
 }
 
+// Hiển thị sidebar
 function renderSidebar(events) {
     const listEl = document.getElementById('taskList');
     const countEl = document.getElementById('taskCount');
@@ -138,6 +141,7 @@ function renderSidebar(events) {
     });
 }
 
+// Cập nhật trạng thái hoàn thành công việc
 function toggleTaskStatus(id, isChecked) {
     fetch('/api/update/' + id, {
         method: 'PUT',
@@ -153,6 +157,7 @@ function toggleTaskStatus(id, isChecked) {
     });
 }
 
+// Thêm công việc mới bằng AI
 function addEventAI() {
     let inputEl = document.getElementById('cmdInput');
     let text = inputEl.value.trim();
@@ -193,10 +198,12 @@ function addEventAI() {
     });
 }
 
+// Xử lý phím Enter trong ô input
 document.getElementById("cmdInput").addEventListener("keypress", function(event) {
     if (event.key === "Enter") addEventAI();
 });
 
+// Mở modal sửa sự kiện
 function findAndOpenEvent(id) {
     let eventData = allEventsCache.find(e => e.id == id);
     if(eventData) {
@@ -232,7 +239,7 @@ function openEditModal(event) {
     myModal.show();
 }
 
-// --- CẬP NHẬT: THÊM TOAST KHI LƯU ---
+// --- THÊM TOAST KHI LƯU ---
 function saveEventUpdate() {
     if(!currentEventId) return;
     let data = {
@@ -255,11 +262,10 @@ function saveEventUpdate() {
     });
 }
 
-// --- CẬP NHẬT: DÙNG SWEETALERT THAY CONFIRM ---
+// --- THÊM XÁC NHẬN KHI XÓA ---
 function deleteCurrentEvent() {
-    // Ẩn modal edit trước (nếu đang mở) để hiện SweetAlert cho đẹp
-    // (Optional, nhưng UX tốt hơn)
-    
+
+// Xác nhận trước khi xóa
     Swal.fire({
         title: 'Bạn có chắc chắn?',
         text: "Sự kiện này sẽ bị xóa vĩnh viễn!",
@@ -283,6 +289,7 @@ function deleteCurrentEvent() {
     });
 }
 
+// --- HỆ THỐNG TOAST ---
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = 'position-fixed bottom-0 end-0 p-3';
@@ -313,9 +320,8 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// --- TÍNH NĂNG: XUẤT FILE JSON ---
+// --- XUẤT FILE JSON ---
 function exportDailyTasks() {
-    // currentFilterDate là biến toàn cục lưu ngày đang chọn (đã khai báo ở đầu file)
     if (!currentFilterDate) {
         showToast("Chưa chọn ngày để xuất!", "error");
         return;
@@ -334,24 +340,27 @@ function exportDailyTasks() {
     showToast("Đang tải xuống file JSON...", "success");
 }
 
-// --- NOTIFICATION SYSTEM ---
+// --- HỆ THỐNG NHẮC NHỞ ---
 if (Notification.permission !== "granted") {
     Notification.requestPermission();
 }
 
 setInterval(checkReminders, 5000); 
 
+// Lấy tập đã thông báo từ localStorage
 function getNotifiedSet() {
     const stored = localStorage.getItem('notified_events');
     return new Set(stored ? JSON.parse(stored) : []);
 }
 
+// Thêm ID sự kiện vào tập đã thông báo
 function addToNotifiedSet(id) {
     const currentSet = getNotifiedSet();
     currentSet.add(String(id)); 
     localStorage.setItem('notified_events', JSON.stringify([...currentSet]));
 }
 
+// Kiểm tra và hiển thị nhắc nhở
 function checkReminders() {
     const now = new Date();
     const notifiedEvents = getNotifiedSet();
@@ -380,6 +389,7 @@ function checkReminders() {
     });
 }
 
+// Hiển thị thông báo nhắc nhở
 function showPersistentNotification(event, minutesLeft) {
     if (Notification.permission === "granted") {
         const timeStr = new Date(event.start).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
@@ -401,6 +411,7 @@ function showPersistentNotification(event, minutesLeft) {
     }
 }
 
+// Phát âm thanh nhắc nhở
 function playNotificationSound() {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -416,4 +427,129 @@ function playNotificationSound() {
     } catch(e) {
         console.error("Audio error:", e);
     }
+}
+
+// --- 1. HÀM TÌM KIẾM ---
+function searchTasks() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+    
+    // Nếu ô tìm kiếm trống -> Quay về hiển thị sự kiện của ngày đang chọn
+    if (!keyword) {
+        filterSidebarByDate(currentFilterDate);
+        return;
+    }
+
+    // Lọc trong toàn bộ cache sự kiện
+    const filtered = allEventsCache.filter(e => {
+        const title = (e.title || '').toLowerCase();
+        const loc = (e.extendedProps.location || '').toLowerCase();
+        // Tìm theo tên hoặc địa điểm
+        return title.includes(keyword) || loc.includes(keyword);
+    });
+
+    // Đổi tiêu đề sidebar
+    const titleEl = document.getElementById('sidebarTitle');
+    if(titleEl) titleEl.innerHTML = `<i class="fas fa-search me-2 text-danger"></i>KẾT QUẢ TÌM KIẾM`;
+    
+    // Gọi render với chế độ tìm kiếm = true
+    renderSidebar(filtered, true);
+}
+
+// --- 2. HÀM RENDER SIDEBAR ---
+function renderSidebar(events, isSearchMode = false) {
+    const listEl = document.getElementById('taskList');
+    const countEl = document.getElementById('taskCount');
+    
+    listEl.innerHTML = ''; 
+    const activeCount = events.filter(e => !e.extendedProps.completed).length;
+    if(countEl) countEl.innerText = activeCount;
+
+    if (!events || events.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-muted p-4"><i class="far fa-calendar-times fa-3x mb-3 text-secondary opacity-25"></i><br>Không tìm thấy kết quả.</div>';
+        return;
+    }
+
+    // Sắp xếp tăng dần theo thời gian
+    events.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    events.forEach(event => {
+        let dateObj = new Date(event.start);
+        let timeStr = dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        if(event.allDay) timeStr = "Cả ngày";
+
+        // Ngày dưới dạng badge (chỉ hiển thị khi ở chế độ tìm kiếm)
+        let dateBadge = '';
+        if (isSearchMode) {
+            const dateStrDisplay = dateObj.toLocaleDateString('vi-VN');
+            dateBadge = `<span class="badge bg-info text-dark me-2 mb-1"><i class="far fa-calendar-alt"></i> ${dateStrDisplay}</span>`;
+        }
+
+        let location = event.extendedProps.location || '';
+        let locHtml = location ? `<span class="badge bg-light text-secondary border"><i class="fas fa-map-marker-alt text-danger"></i> ${location}</span>` : '';
+        
+        let borderStyle = event.extendedProps.type === 'DEADLINE' ? 'border-left: 5px solid #dc3545;' : 'border-left: 5px solid #0d6efd;';
+        const isDone = event.extendedProps.completed === true;
+        const doneClass = isDone ? 'text-decoration-line-through opacity-50 bg-light' : '';
+        const checkAttr = isDone ? 'checked' : '';
+        if(isDone) borderStyle = 'border-left: 5px solid #6c757d;';
+
+        // Hành động khi click vào thẻ:
+        // - Nếu đang tìm kiếm: Click sẽ nhảy đến ngày đó (jumpToDate)
+        // - Nếu đang xem ngày: Click sẽ mở chi tiết để sửa (findAndOpenEvent)
+        const clickAction = isSearchMode 
+            ? `jumpToDate('${event.start}')` 
+            : `findAndOpenEvent(${event.id})`;
+
+        // Tiêu đề tooltip
+        const titleTooltip = isSearchMode ? "Nhấn để đi đến ngày này" : "Nhấn để sửa";
+
+        let html = `
+            <div class="card task-card border-0 p-3 ${doneClass}" style="${borderStyle}; cursor: pointer;" onclick="${clickAction}" title="${titleTooltip}">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <input type="checkbox" class="form-check-input" style="transform: scale(1.3); cursor: pointer;" 
+                            ${checkAttr} onclick="toggleTaskStatus(${event.id}, this.checked); event.stopPropagation();">
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-column align-items-start mb-1">
+                            ${dateBadge}
+                            <h6 class="fw-bold text-dark m-0" style="line-height: 1.4;">${event.title}</h6>
+                        </div>
+                        <div class="mt-1">
+                            <span class="badge bg-primary bg-opacity-10 text-primary">${timeStr}</span>
+                            ${locHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        listEl.innerHTML += html;
+    });
+}
+
+// --- 3. HÀM NHẢY ĐẾN NGÀY TỪ KẾT QUẢ TÌM KIẾM ---
+function jumpToDate(isoDateStr) {
+    // 1. Lấy ngày YYYY-MM-DD
+    const targetDate = isoDateStr.slice(0, 10);
+    
+    console.log("🚀 Nhảy đến ngày:", targetDate);
+
+    // 2. Điều khiển Calendar nhảy đến ngày đó
+    calendar.gotoDate(targetDate);
+    
+    // 3. Quan trọng: Cập nhật biến toàn cục và Sidebar
+    currentFilterDate = targetDate;
+    
+    // 4. Xóa ô tìm kiếm để người dùng thấy danh sách đầy đủ của ngày đó
+    document.getElementById('searchInput').value = '';
+    
+    // 5. Highlight ngày trên lịch
+    document.querySelectorAll('.fc-daygrid-day').forEach(el => el.classList.remove('selected-day-highlight'));
+    const dayEl = document.querySelector(`.fc-day[data-date="${targetDate}"]`);
+    if(dayEl) dayEl.classList.add('selected-day-highlight');
+
+    // 6. Hiển thị lại sidebar chuẩn của ngày đó
+    filterSidebarByDate(targetDate);
+    
+    showToast(`Đã chuyển đến ngày ${new Date(targetDate).toLocaleDateString('vi-VN')}`, 'success');
 }

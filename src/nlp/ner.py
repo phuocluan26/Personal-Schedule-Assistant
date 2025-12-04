@@ -1,7 +1,7 @@
 # src/nlp/ner.py
 from underthesea import ner
 import re
-from processor import TextProcessor # Import để dùng hàm normalize nếu cần
+from processor import TextProcessor
 
 class EntityExtractor:
     def __init__(self):
@@ -46,7 +46,7 @@ class EntityExtractor:
             
             # Brand/Tên ngắn
             "fpt", "fsoft", "viettel", "vinmart", "winmart", "circle k", 
-            "highland", "starbucks", "cali", "lotte", "aeon"
+            "highland", "starbucks", "cali", "lotte", "aeon","bigc"
         ]
 
         # 3. TỪ KHÓA CHẶN (Blocklist) - Để double check
@@ -75,7 +75,7 @@ class EntityExtractor:
         rule_prefix = self._extract_by_prefix(text)
         if rule_prefix: return rule_prefix.title()
 
-        # 3. Tìm bằng giới từ mạnh (Tại/Ở/Đến) - KHÔNG DÙNG "ĐI"
+        # 3. Tìm bằng giới từ mạnh (Tại/Ở/Đến)
         rule_prep = self._extract_by_preposition(text)
         if rule_prep: return rule_prep.title()
         
@@ -88,7 +88,7 @@ class EntityExtractor:
     def _extract_by_prefix(self, text):
         prefixes = "|".join(self.place_prefixes)
         
-        # [NÂNG CẤP] Stop words: Thêm ĐỘNG TỪ để cắt chuỗi tham lam
+        # Stop words: Thêm ĐỘNG TỪ để cắt chuỗi tham lam
         # Fix lỗi: "Siêu thị mua đồ" -> "Siêu thị" (rồi bị loại vì quá ngắn) -> None (Đúng ý)
         # Fix lỗi: "Công viên hóng gió" -> "Công viên" (Có trong common_locations nên sẽ được bắt ở Bước 1)
         
@@ -167,5 +167,19 @@ class EntityExtractor:
         
         # Check Time keywords
         if re.search(r"\b(hôm|nay|mai|mốt|giờ|phút|giây)\b", loc_lower): return False
+        
+        # Danh sách địa điểm được phép đứng một mình (Whitelist)
+        allow_standalone = [
+            "chợ", "siêu thị", "nhà sách", "sân bay", "trường", "công viên", 
+            "bệnh viện", "rạp", "thư viện", "công ty", "shop", "hồ", "bể bơi",
+            "cho", "sieu thi", "nha sach", "san bay", "truong", "cong vien", 
+            "benh vien", "rap", "thu vien", "cong ty", "ho", "be boi"
+        ]
+
+        # Check Prefix đơn lẻ
+        if loc_lower in self.place_prefixes: 
+            # Nếu từ này nằm trong whitelist thì cho qua (True), còn không thì chặn
+            if loc_lower not in allow_standalone:
+                return False
         
         return True

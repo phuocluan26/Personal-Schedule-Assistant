@@ -37,7 +37,6 @@ class RuleBasedExtractor:
                 r"\b(?:hôm|hom)\s*(?:nay|qua|kia|sau)\b",
                 
                 # --- Nhóm 2: Bắt "Mai/Mốt" đứng SAU THỜI GIAN (Lookbehind) ---
-                # [MỚI] Đây là phần sửa lỗi "17h mai" hoặc "17:30 mai"
                 # Logic: Chỉ bắt chữ "mai" nếu phía trước nó là số hoặc chữ h/g/phút
                 
                 # Case: Sau số (VD: "17 mai", "9:30 mai", "17h30 mai")
@@ -64,6 +63,12 @@ class RuleBasedExtractor:
             # 5. Buổi (CẬP NHẬT: Thêm \b để bắt chính xác từ đơn)
             "session": [
                 r"\b(sáng|trưa|chiều|tối|đêm|sang|trua|chieu|toi|dem)\b"
+            ],
+            
+            # 6. Bắt lệnh nhắc nhở tùy chỉnh
+            "reminder": [
+                # VD: "nhắc tôi trước 30 phút", "báo trước 1 tiếng"
+                r"\b(?:hãy\s+)?(?:nhắc|báo|hẹn|thông báo)\s*(?:nhở|tôi|mình|bạn|em)?\s*(?:trước|lại|thêm)?\s*(\d+)\s*(phút|p|h|giờ|tiếng)\b", 
             ]
         }
 
@@ -71,7 +76,10 @@ class RuleBasedExtractor:
         results = {
             "time_str": None, "date_str": None,
             "day_month": None, "session": None,
-            "special_type": None
+            "special_type": None,
+            # Thêm trường output cho reminder
+            "reminder_minutes": 15,
+            "reminder_str": None
         }
         
         for p in self.patterns["time_absolute"]:
@@ -108,5 +116,20 @@ class RuleBasedExtractor:
             if match:
                 results["session"] = match.group(0)
                 break
+        
+        for p in self.patterns["reminder"]:
+            match = re.search(p, text, re.IGNORECASE)
+            if match:
+                results["reminder_str"] = match.group(0) 
+                val = int(match.group(1))
+                unit = match.group(2).lower()
                 
+                # Quy đổi ra phút
+                if unit in ['h', 'giờ', 'tiếng']:
+                    results["reminder_minutes"] = val * 60
+                else:
+                    results["reminder_minutes"] = val
+                break
+                
+        return results        
         return results

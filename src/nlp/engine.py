@@ -53,12 +53,12 @@ class NLPEngine:
             if not collision:
                 # Chỉ check blacklist nếu location dài (>1 từ) để tránh xóa tên riêng ngắn
                 if len(raw_location.split()) > 1 and any(word in raw_location.lower() for word in blacklist):
-                    pass # Bị dính blacklist
+                    pass
                 else:
                     final_location = raw_location.title()
                     is_real_location = True
 
-        # 3. Tính toán thời gian (QUAN TRỌNG: Hứng tuple trả về)
+        # 3. Tính toán thời gian
         time_obj, time_error = self.timer.parse_time(
             time_info['time_str'], 
             time_info['session'], 
@@ -92,7 +92,7 @@ class NLPEngine:
             all_day = True
             event_type = "EVENT"
 
-        # 4. Xử lý Tiêu đề (Clean Title - Nâng cao)
+        # 4. Xử lý Tiêu đề
         title = raw_text 
         strings_to_remove = []
         
@@ -115,8 +115,22 @@ class NLPEngine:
             strings_to_remove.extend(matches)
 
         if time_info['date_str']: strings_to_remove.append(time_info['date_str'])
-        if time_info['session']: strings_to_remove.append(time_info['session'])
-
+        # D. Logic giữ lại buổi nếu là hoạt động (VD: Ăn trưa, Ăn tối)
+        session = time_info['session']
+        if session:
+            # Kiểm tra xem trước chữ buổi có động từ "ăn" không
+            # Dùng regex để bắt chính xác (VD: "an trua", "ăn trưa")
+            is_activity = re.search(rf"\b(ăn|an)\s+{session}\b", clean_text, re.IGNORECASE)
+            
+            # Nếu KHÔNG PHẢI là "ăn trưa/tối", thì mới xóa chữ buổi đi
+            if not is_activity:
+                strings_to_remove.append(session)
+        
+        # Sắp xếp chuỗi cần xóa theo độ dài giảm dần để tránh xóa nhầm
+        # VD: Nếu có "Sân Mỹ Đình" và "Mỹ Đình", phải xóa "Sân Mỹ Đình" trước
+        strings_to_remove = [s for s in strings_to_remove if s] # Lọc None
+        strings_to_remove.sort(key=len, reverse=True)
+        
         for s in strings_to_remove:
             if s: title = re.sub(re.escape(s), '', title, flags=re.IGNORECASE)
 
@@ -126,7 +140,7 @@ class NLPEngine:
             title = re.sub(rf"\b{conn}\s+(?=\s|$)", "", title, flags=re.IGNORECASE)
 
         title = re.sub(r'\s+', ' ', title).strip().rstrip(",.-")
-        if len(title) < 2: title = raw_text # Fallback nếu xóa sạch trơn
+        if len(title) < 2: title = raw_text
 
         return {
             "title": title.capitalize(),
@@ -135,6 +149,6 @@ class NLPEngine:
             "event_type": event_type,
             "all_day": all_day,
             "location": final_location,
-            "reminder_minutes": 15,
+            "reminder_minutes": time_info['reminder_minutes'],
             "is_valid": True
         }

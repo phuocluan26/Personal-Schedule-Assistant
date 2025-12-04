@@ -116,156 +116,23 @@
     </div>
 </div>
 
-<script>
-    let myChart = null;
-    let currentData = []; // Lưu dữ liệu để export
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-bell me-2 text-primary"></i>
+                <strong class="me-auto" id="toastTitle">Thông báo</strong>
+                <small>Vừa xong</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody">
+                Nội dung thông báo...
+            </div>
+        </div>
+    </div>
 
-    function runNLPTest() {
-        const fileInput = document.getElementById('csvFileInput');
-        if (fileInput.files.length === 0) {
-            alert("Vui lòng chọn file CSV!");
-            return;
-        }
+</div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-
-        const btn = document.querySelector('button[onclick="runNLPTest()"]');
-        const oldText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-        btn.disabled = true;
-
-        fetch('/api/test-nlp', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            btn.innerHTML = oldText;
-            btn.disabled = false;
-
-            if (data.success) {
-                currentData = data.data; 
-                showDashboard(data);
-            } else {
-                alert("Lỗi: " + data.error);
-            }
-        })
-        .catch(err => {
-            btn.innerHTML = oldText;
-            btn.disabled = false;
-            alert("Lỗi kết nối Server!");
-        });
-    }
-
-    function showDashboard(data) {
-        document.getElementById('dashboardArea').classList.remove('d-none');
-        
-        document.getElementById('scoreText').innerText = data.accuracy + '%';
-        document.getElementById('totalCount').innerText = data.total;
-        document.getElementById('passCount').innerText = data.correct;
-        document.getElementById('failCount').innerText = data.fail;
-
-        renderChart(data.correct, data.fail);
-        renderResults(data);
-    }
-
-    function renderResults(data) {
-        const tbody = document.getElementById('resultTableBody');
-        tbody.innerHTML = ''; 
-        
-        data.data.forEach(row => {
-            const statusBadge = row.status === 'PASS' 
-                ? `<span class="status-pass"><i class="fas fa-check"></i> PASS</span>` 
-                : `<span class="status-fail"><i class="fas fa-times"></i> FAIL</span>`;
-            
-            const trClass = row.status === 'FAIL' ? 'table-danger' : '';
-            
-            // --- SỬA LỖI Ở ĐÂY: Xử lý null an toàn ---
-            const errorMsg = row.error || ""; 
-            const isTimeErr = errorMsg.includes("Giờ");
-            const isLocErr = errorMsg.includes("Vị trí");
-            const isTitleErr = errorMsg.includes("Tiêu đề");
-            // ------------------------------------------
-
-            const formatCell = (exp, act, isError) => {
-                // Nếu sai thì chữ thực tế màu đỏ, đậm
-                const color = isError ? 'text-danger fw-bold' : 'text-dark';
-                return `<div class="small text-muted">${exp}</div><div class="${color}">${act}</div>`;
-            };
-
-            const tr = `
-                <tr class="${trClass}">
-                    <td>${row.id}</td>
-                    <td><small>${row.text}</small></td>
-                    <td>${formatCell(row.expected_time, row.actual_time, isTimeErr)}</td>
-                    <td>${formatCell(row.expected_loc, row.actual_loc, isLocErr)}</td>
-                    <td>${formatCell(row.expected_title, row.actual_title, isTitleErr)}</td>
-                    <td>${statusBadge}</td>
-                </tr>
-            `;
-            tbody.innerHTML += tr;
-        });
-    }
-
-    function renderChart(pass, fail) {
-        const ctx = document.getElementById('accuracyChart').getContext('2d');
-        if (myChart) myChart.destroy();
-
-        myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Chính xác', 'Sai sót'],
-                datasets: [{
-                    data: [pass, fail],
-                    backgroundColor: ['#198754', '#dc3545'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
-                cutout: '70%'
-            }
-        });
-    }
-
-    // Hàm xuất CSV từ trình duyệt
-    function exportResultCSV() {
-        if (currentData.length === 0) return;
-
-        let csvContent = "data:text/csv;charset=utf-8,";
-        // Header có thêm BOM để Excel mở không lỗi font tiếng Việt
-        csvContent += "\uFEFF"; 
-        csvContent += "ID,Input Text,Expected Time,Actual Time,Expected Loc,Actual Loc,Expected Title,Actual Title,Status,Error\n";
-
-        currentData.forEach(row => {
-            // Escape dấu phẩy trong nội dung bằng ngoặc kép
-            const escape = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
-            
-            const line = [
-                row.id,
-                escape(row.text),
-                escape(row.expected_time), escape(row.actual_time),
-                escape(row.expected_loc), escape(row.actual_loc),
-                escape(row.expected_title), escape(row.actual_title),
-                row.status,
-                escape(row.error)
-            ].join(",");
-            
-            csvContent += line + "\n";
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "nlp_test_report.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-</script>
+<script src="/static/js/test_script.js"></script>
 
 </body>
 </html>

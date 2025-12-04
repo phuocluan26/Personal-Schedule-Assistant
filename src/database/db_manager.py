@@ -68,7 +68,7 @@ class DBManager:
         
         for event in events:
             if int(event['id']) == int(event_id):
-                # Cập nhật các trường thông thường
+                # CẬP NHẬT CÁC TRƯỜNG THÔNG THƯỜNG
                 if 'title' in new_data: event['title'] = new_data['title']
                 if 'start_time' in new_data: event['start_time'] = new_data['start_time']
                 if 'location' in new_data: event['location'] = new_data['location']
