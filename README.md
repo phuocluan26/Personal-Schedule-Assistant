@@ -2,8 +2,8 @@
 
 **Smart Schedule AI** là ứng dụng quản lý thời gian thông minh trên máy tính, cho phép người dùng **nhập liệu bằng ngôn ngữ tự nhiên tiếng Việt** (ví dụ: *"Họp team lúc 9h sáng mai tại phòng 302"*) thay vì phải chọn ngày giờ thủ công.
 
-> **Tác giả:** Phước Luân  
-> **Phiên bản:** 1.0.0 (Stable)
+> **Tác giả:** Nguyễn Phước Luân  
+> **Phiên bản:** 1.0.0
 
 ---
 
@@ -12,7 +12,7 @@
 ### 🧠 1. Xử lý ngôn ngữ tự nhiên (NLP)
 * **Hiểu tiếng Việt:** Tự động nhận diện Thời gian (ngày, giờ, buổi), Địa điểm và Tên sự kiện từ câu nói.
 * **Xử lý linh hoạt:** Hiểu các cụm từ như *"ngày mai"*, *"tuần sau"*, *"cuối tuần"*, *"hôm nay"*.
-* **Tự động nhắc nhở:** Hỗ trợ đặt lịch nhắc (mặc định nhắc trước 15p).
+* **Tự động nhắc nhở:** Hỗ trợ đặt lịch nhắc (VD: *"nhắc trước 15 phút"*).
 
 ### 🗓️ 2. Quản lý lịch trình trực quan
 * **Giao diện Lịch (Calendar):** Xem tổng quan theo Tháng, Tuần, Ngày.
@@ -59,7 +59,7 @@ Hãy nhập câu lệnh vào ô trống trên cùng và nhấn **Thêm (AI)** ho
 | **Ngày tương đối** | "Nộp báo cáo **sáng mai**" | 08:00 Ngày mai |
 | **Thứ trong tuần** | "Họp team **thứ 2 tuần sau**" | Thứ 2 của tuần kế tiếp |
 | **Địa điểm** | "Cafe **tại Highland** lúc 9h" | Địa điểm: Highland |
-
+| **Nhắc nhở** | "Đi đón con **nhắc trước 30p**" | Đặt lịch nhắc trước 30 phút |
 | **Kết hợp** | "**Sáng mai 8h** đi làm **ở công ty**" | 08:00 Mai - Tại: Công ty |
 
 ---
@@ -108,3 +108,39 @@ PersonalScheduleAssistant/
 │
 ├── Start_App.bat               <-- File chạy dự phòng (Script tự cài môi trường)
 └──  requirements.txt            <-- Danh sách thư viện
+````
+
+## 💻 Công nghệ sử dụng
+
+  * **Ngôn ngữ:** Python 3.x
+  * **Web Framework:** Flask
+  * **Frontend:** HTML5, CSS3, Bootstrap 5, FullCalendar.js
+  * **NLP Library:** Underthesea (Tokenize), Regex, Python-dateutil
+  * **Build Tool:** PyInstaller
+
+## ⚙️ Chạy từ mã nguồn (Source Code)
+
+Nếu bạn muốn chỉnh sửa code, hãy làm theo các bước sau:
+
+1.  **Clone dự án:**
+
+    ```bash
+    git clone [https://github.com/phuocluan26/Personal-Schedule-Assistant.git](https://github.com/username/PersonalScheduleAssistant.git)
+    cd PersonalScheduleAssistant
+    ```
+
+2.  **Cài đặt thư viện:**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Chạy ứng dụng:**
+
+    ```bash
+    python src/app.py
+    ```
+
+-----
+
+*Đồ án chuyên ngành - Năm học 2025 - 3121410306 - Nguyễn Phước Luân*

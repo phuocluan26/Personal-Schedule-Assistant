@@ -15,6 +15,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from database.db_manager import DBManager
 from nlp.engine import NLPEngine
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 # Khởi tạo Flask app và các thành phần cần thiết
 app = Flask(__name__, template_folder='web/templates', static_folder='web/static')
 db = DBManager()
@@ -245,10 +249,15 @@ def process_test_file():
         print(f"❌ LỖI SERVER: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
-# Hàm mở trình duyệt tự động khi chạy app
-def open_browser():
-    webbrowser.open_new("http://127.0.0.1:5000")
-    
+# Chạy ứng dụng Flask
 if __name__ == '__main__':
+    def open_browser():
+        webbrowser.open_new("http://127.0.0.1:5000")
     Timer(1, open_browser).start()
+
+    print("\n" + "="*50)
+    print("  SERVER DA KHOI DONG THANH CONG!")
+    print("  Ung dung dang chay tai: http://127.0.0.1:5000")
+    print("  (Dung tat cua so nay de giu ung dung hoat dong)")
+    print("="*50 + "\n")
     app.run(debug=False, port=5000, use_reloader=False)

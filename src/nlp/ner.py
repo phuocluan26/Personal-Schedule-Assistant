@@ -1,7 +1,7 @@
 # src/nlp/ner.py
 from underthesea import ner
 import re
-from processor import TextProcessor
+from .processor import TextProcessor
 
 class EntityExtractor:
     def __init__(self):

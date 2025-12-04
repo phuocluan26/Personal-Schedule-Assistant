@@ -4,11 +4,11 @@ import os
 import re
 from datetime import datetime, timedelta
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from processor import TextProcessor
-from ner import EntityExtractor
-from rules import RuleBasedExtractor
-from time_parser import TimeParser
+# Import tương đối (Chuẩn cho đóng gói EXE)
+from .processor import TextProcessor
+from .ner import EntityExtractor
+from .rules import RuleBasedExtractor
+from .time_parser import TimeParser
 
 class NLPEngine:
     def __init__(self):
